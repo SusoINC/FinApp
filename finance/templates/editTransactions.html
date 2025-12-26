@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Transacciones</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('finance.static', filename='css/styles.css') }}">
+</head>
+<body>
+    <!-- Barra de navegación -->
+    {% include 'navbar.html' %}
+
+    <h2 class="page-title">Editar Transacciones</h2>
+
+    <!-- Filtros -->
+    <div class="filters-section">
+        <form method="POST" action="{{ url_for('finance.edit_transactions') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <div class="filters-row">
+                <div class="filter-item">
+                    <label for="start_date">Fecha desde:</label>
+                    <input type="date" id="start_date" name="start_date" value="{{ filters.start_date if filters else '' }}">
+                </div>
+                <div class="filter-item">
+                    <label for="end_date">Fecha hasta:</label>
+                    <input type="date" id="end_date" name="end_date" value="{{ filters.end_date if filters else '' }}">
+                </div>
+                <div class="filter-item">
+                    <label for="entity">Entidad:</label>
+                    <select id="entity" name="entity">
+                        <option value="">Todas</option>
+                        {% for entity in entities %}
+                            <option value="{{ entity.id }}" {% if filters and filters.entity == entity.id|string %}selected{% endif %}>
+                                {{ entity.IBAN }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label for="type">Tipo:</label>
+                    <select id="type" name="type">
+                        <option value="">Todos</option>
+                        {% for type in types %}
+                            <option value="{{ type.id }}" {% if filters and filters.type == type.id|string %}selected{% endif %}>
+                                {{ type.Item }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label for="class">Clase:</label>
+                    <select id="class" name="class">
+                        <option value="">Todas</option>
+                        {% for class in classes %}
+                            <option value="{{ class.id }}" {% if filters and filters.class == class.id|string %}selected{% endif %}>
+                                {{ class.Item }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label for="category">Categoría:</label>
+                    <select id="category" name="category">
+                        <option value="">Todas</option>
+                        {% for category in categories %}
+                            <option value="{{ category.id }}" {% if filters and filters.category == category.id|string %}selected{% endif %}>
+                                {{ category.Item }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label for="detail">Detail:</label>
+                    <input type="text" id="detail" name="detail" value="{{ filters.detail if filters else '' }}">
+                </div>
+                <div class="filter-item">
+                    <label for="company">Company:</label>
+                    <input type="text" id="company" name="company" value="{{ filters.company if filters else '' }}">
+                </div>
+            </div>
+            <button type="submit">Filtrar</button>
+        </form>
+    </div>
+
+    <!-- Tabla de transacciones -->
+    <table>
+        <thead>
+            <tr>
+                <th>Op_Date</th>
+                <th>Categoria</th>
+                <th>Subcategoria</th>
+                <th>Description</th>
+                <th>Comentario</th>
+                <th>Amount</th>
+                <th>Type</th>
+                <th>Class</th>
+                <th>Category</th>
+                <th>Detail</th>
+                <th>Company</th>
+                <th>FreeText</th>
+            </tr>
+        </thead>
+        <tbody  id="transactions-body">
+            {% for transaccion in transacciones %}
+            <tr data-id="{{ transaccion.id }}">
+                <!-- Campos visibles sin edición -->
+                <td class="op-date">{{ transaccion.Op_Date }}</td>
+                <td>{{ transaccion.Categoria }}</td>
+                <td>{{ transaccion.Subcategoria }}</td>
+                <td>{{ transaccion.Description }}</td>
+                <td>{{ transaccion.Comment }}</td>
+                <td class="amount">{{ transaccion.Amount }}</td>
+
+                <!-- Campos editables -->
+                <td>
+                    <select name="Type">
+                        <option value=""></option>
+                        {% for type in types %}
+                            <option value="{{ type.id }}" {% if type.id == transaccion.Type %}selected{% endif %}>
+                                {{ type.Item }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td>
+                    <select name="Class">
+                        <option value=""></option>
+                        {% for class in classes %}
+                            <option value="{{ class.id }}" {% if class.id == transaccion.Class %}selected{% endif %}>
+                                {{ class.Item }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td>
+                    <select name="Category">
+                        <option value=""></option>
+                        {% for category in categories %}
+                            <option value="{{ category.id }}" {% if transaccion.Category == category.id %}selected{% endif %}>
+                            {{ category.Item }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td><input type="text" name="Detail" value="{{ transaccion.Detail }}"></td>
+                <td><input type="text" name="Company" value="{{ transaccion.Company }}"></td>
+                <td><input type="text" name="FreeText" value="{{ transaccion.FreeText }}"></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr id="total-row">
+                <td colspan="5" style="text-align: right;"><strong>Total:</strong></td>
+                <td id="total-amount" class="amount"></td>
+                <td colspan="6"></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <button onclick="guardarCambios()">Guardar</button>
+
+    <script>
+        // Función para guardar los cambios (similar a categorize.html)
+        function guardarCambios() {
+            let data = [];
+            let totalRows = 0;
+            let includedRows = 0;
+
+            // Obtener el valor seleccionado de Entity una sola vez
+            const selectedEntity = document.getElementById('entity').value;
+
+            document.querySelectorAll("tbody tr").forEach(row => {
+                totalRows++;
+                let typeValue = row.querySelector("select[name='Type']").value;
+
+                // Solo considerar la transacción si Type no es vacío ni el valor del primer elemento (normalmente "")
+                if (typeValue && typeValue !== "" && typeValue !== "0" && typeValue !== "NULL") {
+                    let transaccion = {
+                        id: row.dataset.id,
+                        Entity: selectedEntity,
+                        Type: typeValue,
+                        Class: row.querySelector("select[name='Class']").value,
+                        Category: row.querySelector("select[name='Category']").value,
+                        Detail: row.querySelector("input[name='Detail']").value,
+                        Company: row.querySelector("input[name='Company']").value,
+                        FreeText: row.querySelector("input[name='FreeText']").value
+                    };
+                    data.push(transaccion);
+                    includedRows++;
+                }
+            });
+
+            console.log(`Total filas: ${totalRows}, Filas incluidas: ${includedRows}`);
+            console.log('Datos enviados:', data);
+
+            // Solo hacer la petición si hay datos para enviar
+            if (data.length > 0) {
+                fetch('{{ url_for("finance.actualizar_transacciones") }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json',
+                               'X-CSRFToken': '{{ csrf_token() }}'
+                     },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(responseData => {
+                    console.log('Respuesta del servidor:', responseData);
+                    alert(responseData.mensaje);
+                    // Recargar la página para reflejar los cambios
+                    if (responseData.actualizados > 0) {
+                        window.location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al guardar los cambios: ' + error);
+                });
+            } else {
+                alert("No hay transacciones para actualizar. Asegúrate de seleccionar un Type válido para al menos una transacción.");
+            }
+        }
+
+        // Formatear la columna Amount y aplicar color si es negativo o positivo
+        document.addEventListener("DOMContentLoaded", function() {
+            let totalAmount = 0; // Inicializar la variable del total
+
+            document.querySelectorAll("tbody tr").forEach(row => {
+                let cell = row.querySelector(".amount");
+                // Extraer el valor numérico (considerando formato español con coma decimal si es necesario)
+                let cellText = cell.textContent.replace('€', '').trim(); 
+                let value = parseFloat(cellText); 
+
+                if (!isNaN(value)) {
+                    totalAmount += value; // Sumar al total
+
+                    // Formatear la celda individual (como ya lo haces)
+                    cell.textContent = value.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '€';
+                    if (value < 0) {
+                        row.classList.add("negative-amount");
+                    } else if (value > 0) {
+                        row.classList.add("positive-amount");
+                    }
+                }
+            });
+
+            // Ahora sí, mostrar el total calculado
+            let totalElement = document.querySelector("#total-amount");
+            let totalRowElement = document.querySelector("#total-row"); // Selecciona la fila del total
+
+            if (totalElement && totalRowElement) { // Asegúrate que ambos elementos existen
+                totalElement.textContent = 
+                    totalAmount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '€';
+
+                // Limpiar clases previas por si acaso
+                totalRowElement.classList.remove("negative-amount", "positive-amount"); 
+
+                // Aplicar estilo de color al total y a la fila
+                if (totalAmount < 0) {
+                    totalRowElement.classList.add("negative-amount");
+                } else if (totalAmount > 0) {
+                    totalRowElement.classList.add("positive-amount");
+                }
+            }
+        });
+
+        // Script para ajustar el ancho de los selects
+        function ajustarAnchoSelects() {
+            document.querySelectorAll('select').forEach(select => {
+                const tempElement = document.createElement('span');
+                tempElement.style.visibility = 'hidden';
+                tempElement.style.whiteSpace = 'nowrap';
+                tempElement.style.fontSize = window.getComputedStyle(select).fontSize;
+                tempElement.style.fontFamily = window.getComputedStyle(select).fontFamily;
+                tempElement.textContent = select.options[select.selectedIndex].text;
+
+                document.body.appendChild(tempElement);
+                select.style.width = `${tempElement.offsetWidth + 30}px`;
+                document.body.removeChild(tempElement);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', ajustarAnchoSelects);
+        document.querySelectorAll('select').forEach(select => {
+            select.addEventListener('change', ajustarAnchoSelects);
+        });
+    </script>
+</body>
+</html>

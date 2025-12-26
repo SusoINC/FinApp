@@ -1,0 +1,223 @@
+/* finance/static/css/styles.css */
+
+/* -------- Estilos para budgetStatus.html -------- */
+#statusTable thead th.total-percentage-column,
+#statusTable thead th.total-amount-column {
+    /* El color azul general ya se aplica desde styles.css global, 
+       pero podemos añadir especificidad si es necesario o estilos únicos */
+}
+
+#statusTable .total-percentage-column { 
+    background-color: #e6f2ff !important;
+    /* border-left: 2px solid #007bff !important; MOVIDO */
+    font-weight: 800;
+}
+/* Nueva columna Total % es la segunda, la última sería Presup. Total */
+#statusTable td.total-percentage-column:last-of-type, /* Si se vuelve a mover al final */
+#statusTable th.total-percentage-column:last-of-type {
+    /* border-left: 2px solid #007bff !important; */
+}
+
+
+#statusTable .total-amount-column { 
+   background-color: #f0f8ff !important; 
+   font-weight: 500;
+   color: #333 !important; 
+}
+
+#statusTable .footer-overall-total-percentage { 
+    background-color: #d0e8ff !important;
+    font-weight: bold;
+}
+#statusTable .footer-month-total-percentage { 
+    background-color: #e9ecef !important;
+    font-weight: bold;
+}
+#statusTable .footer-amount-total { 
+    background-color: #f5f5f5 !important;
+    font-weight: bold;
+    color: #333 !important; 
+}
+
+/* Color Coding para budgetStatus.html (y potencialmente reutilizable) */
+.budget-future-month { color: #777 !important; font-style: italic !important; background-color: #fdfdfd !important; }
+.budget-zero-actual { background-color: #fff3cd !important; color: #856404 !important; } 
+.budget-low-actual { background-color: #fff3cd !important; color: #856404 !important; }  
+.budget-on-target { background-color: #d4edda !important; color: #155724 !important; } 
+.budget-over-moderate { background-color: #ffeeba !important; color: #856404 !important;}
+.budget-over-high { background-color: #f8d7da !important; color: #721c24 !important; }    
+.budget-unbudgeted-expense-perc { background-color: #343a40 !important; color: #ffffff !important; font-weight: bold; }
+.sum-actual-over-budget { background-color: #f8d7da !important; color: #721c24 !important; font-weight: bold; }
+
+
+/* -------- Estilos para categorize.html y editTransactions.html -------- */
+/* (Muchas tablas aquí usan el estilo global de 'table thead th') */
+.entity-selector { /* Para categorize.html */
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: var(--background-section);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow-soft);
+}
+.entity-selector label {
+    font-weight: 500;
+    margin-right: 10px;
+}
+.entity-selector select {
+    min-width: 250px; /* Más ancho para IBANs largos */
+}
+
+/* Para las tablas de categorize y editTransactions */
+.transactions-table-container { /* Un wrapper si es necesario */
+    /* overflow-x: auto; si no es DataTables y puede ser muy ancha */
+}
+.transactions-table-container td.op-date {
+    white-space: nowrap; 
+}
+.transactions-table-container .negative-amount td, /* Aplicar a toda la fila si la clase está en TR */
+.transactions-table-container td.negative-value { /* O a una celda específica */
+    background-color: rgba(231, 76, 60, 0.15) !important; /* Rojo muy claro */
+    color: #a94442 !important; /* Rojo oscuro para texto */
+}
+.transactions-table-container .positive-amount td,
+.transactions-table-container td.positive-value {
+    background-color: rgba(46, 204, 113, 0.1) !important; /* Verde muy claro */
+    color: #1e7e34 !important; /* Verde oscuro para texto */
+}
+/* Fila de total en editTransactions */
+#total-row td { /* Asumiendo que #total-row es un TR */
+    font-weight: bold;
+    background-color: #f8f9fa;
+}
+
+
+/* -------- Estilos para upload.html -------- */
+.upload-container, .result-container { /* Ya tenías estos selectores */
+    max-width: 700px; /* Un poco más ancho */
+    margin: 30px auto; /* Más margen superior */
+    padding: 25px;
+    background-color: var(--background-section);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow-soft);
+}
+.form-group {
+    margin-bottom: 20px; /* Más espacio */
+}
+.form-group label {
+    display: block;
+    margin-bottom: 8px; /* Más espacio */
+    font-weight: 500;
+    color: var(--text-color-light);
+}
+.upload-container .form-group button { /* Botón de carga */
+    background-color: var(--secondary-color);
+    font-size: 1.05em;
+}
+.upload-container .form-group button:hover {
+    background-color: var(--secondary-color-dark);
+}
+.file-info {
+    font-size: 0.9em;
+    color: #6c757d; /* Gris más suave */
+    margin-top: 8px;
+    display: block; /* Asegurar que esté en su propia línea */
+}
+#loading {
+    margin: 15px 0;
+    color: var(--primary-color);
+    font-style: italic;
+}
+
+/* -------- Estilos para budget.html -------- */
+/* Muchos estilos de .container-section, .page-title, .section-title ya están en global.css */
+/* Aquí solo lo específico de budget.html si es necesario */
+
+.budget-section .month-header { /* Estilo específico para budget.html si es diferente del global */
+    min-width: 80px;
+    /* text-align: center; Ya en global */
+}
+.budget-input-table th.observations-header-input { 
+    min-width: 200px;
+}
+.details-table table.dataTable thead th.observations-header,
+.details-table table.dataTable tbody td.observations-cell {
+    min-width: 150px; 
+    max-width: 250px; /* Limitar ancho de observaciones */
+    word-break: break-word;
+}
+/* Summary cards styles (copied from main dashboard to keep look consistent)
+   You can move these to a shared CSS file later (e.g. static/css/styles.css) */
+.summary-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 18px 0;
+}
+.summary-cards .card {
+    background: linear-gradient(180deg, #ffffff, #fbfbfd);
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 8px;
+    padding: 14px 18px;
+    min-width: 130px;
+    flex: 1 1 140px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.summary-cards .card h3 {
+    margin: 0 0 6px 0;
+    font-size: 0.95rem;
+    color: #333;
+    font-weight: 600;
+}
+.summary-cards .card .amount {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0b5ed7;
+}
+
+.dashboard-container .card { /* Ya tienes estilos para card en el global, aquí especificidad si es necesario */
+    flex: 1;
+    background-color: var(--background-section); /* Usar variable CSS */
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow-soft);
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 20px; /* Para layout de columna en móvil */
+}
+.dashboard-container .summary-cards {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 30px;
+    flex-wrap: wrap; /* Para que se ajusten en pantallas más pequeñas */
+}
+/* Responsive para Dashboard (ya lo tenías, ajustado un poco) */
+@media (max-width: 992px) { /* Tablets y móviles grandes */
+    .dashboard-container .charts-row {
+        flex-direction: column;
+    }
+}
+@media (max-width: 768px) { /* Móviles */
+    .dashboard-container .summary-cards {
+        flex-direction: column;
+    }
+}
+
+/* Colores de borde superior para tarjetas del dashboard */
+#latest-card { border-top: 4px solid #4e79a7; }
+#ly-card { border-top: 4px solid #59a14f; }
+#ytd-card { border-top: 4px solid #e15759; }
+#mtd-card { border-top: 4px solid #f28e2c; } /* Naranja para inversiones */
+#wtd-card { border-top: 4px solid #76B7B2; }   /* Un teal para calidad */
+#day-card { border-top: 4px solid #abb776; }   /* Un teal para calidad */
+
+.dashboard-container .amount {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin: 10px 0 0;
+}
+#latest-close { color: #4e79a7; }
+#last-year-pct { color: #59a14f; }
+#ytd-pct { color: #e15759; }
+#mtd-pct { color: #f28e2c; }
+#wtd-pct { color: #76B7B2; }
+#day-pct { color: #abb776; }

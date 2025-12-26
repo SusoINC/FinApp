@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis de Símbolos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('investment.static', filename='css/styles.css') }}">
+    <style>
+        .chart-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .chart-full-width {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .chart-half-width {
+            width: 48%;
+            margin-right: 2%;
+        }
+        .chart-half-width:last-child {
+            margin-right: 0;
+        }
+        .chart-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    {% include 'navbar.html' %}
+
+    <div class="content">
+        <div class="dashboard-container">
+            <!-- Selector de Símbolo -->
+            <div class="filters-section">
+                <h2>Filtros</h2>
+                <div class="filters-row">
+                    <div class="filter-item">
+                        <label for="symbol-select">Símbolo:</label>
+                        <select id="symbol-select" class="filter-select">
+                            <option value="">Seleccione un símbolo</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tarjetas de Métricas -->
+            <div class="summary-cards">
+                <div class="card" id="latest-card">
+                    <h3>Último Close</h3>
+                    <p class="amount" id="latest-close">-</p>
+                </div>
+                <div class="card" id="ly-card">
+                    <h3>Last Year %</h3>
+                    <p class="amount" id="last-year-pct">-</p>
+                </div>
+                <div class="card" id="ytd-card">
+                    <h3>YTD %</h3>
+                    <p class="amount" id="ytd-pct">-</p>
+                </div>
+                <div class="card" id="mtd-card">
+                    <h3>MTD %</h3>
+                    <p class="amount" id="mtd-pct">-</p>
+                </div>
+                <div class="card" id="wtd-card">
+                    <h3>WTD %</h3>
+                    <p class="amount" id="wtd-pct">-</p>
+                </div>
+                <div class="card" id="day-card">
+                    <h3>Day %</h3>
+                    <p class="amount" id="day-pct">-</p>
+                </div>
+            </div>
+
+            <!-- Filtros de Fecha -->
+            <div class="filters-section" style="margin-top:20px">
+                <div class="filters-row">
+                    <div class="filter-item">
+                        <label for="start-date">Desde:</label>
+                        <input type="date" id="start-date" class="filter-select">
+                    </div>
+                    <div class="filter-item">
+                        <label for="end-date">Hasta:</label>
+                        <input type="date" id="end-date" class="filter-select">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico Candlestick -->
+            <div class="chart-full-width">
+                <div class="chart-container">
+                    <h3>Gráfico Candlestick con Medias Móviles</h3>
+                    <div id="candlestick-chart" style="width: 100%; height: 500px;"></div>
+                </div>
+            </div>
+
+            <!-- Gráficos inferiores -->
+            <div class="chart-row">
+                <div class="chart-half-width">
+                    <div class="chart-container">
+                        <h3>Precio de Cierre</h3>
+                        <div id="price-chart" style="width: 100%; height: 400px;"></div>
+                    </div>
+                </div>
+                <div class="chart-half-width">
+                    <div class="chart-container">
+                        <h3>Variación Base 0</h3>
+                        <div id="performance-chart" style="width: 100%; height: 400px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="{{ url_for('investment.static', filename='js/symbolAnalysis.js') }}"></script>
+</body>
+</html>

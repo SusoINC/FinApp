@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Gestor de Presupuesto</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('finance.static', filename='css/styles.css') }}">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    <div class="page-container"> 
+        <h2 class="page-title">Gestor de Presupuesto</h2>
+
+        <div class="container-section filters-section">
+            <h3 class="section-title">Filtros</h3>
+            <form id="filtersFormBudget" class="filters-row"> {# ID cambiado para evitar colisión si tienes otra form con mismo ID #}
+                <div class="filter-item">
+                    <label for="yearFilterBudget">Año:</label> {# ID cambiado #}
+                    <input type="number" id="yearFilterBudget" name="year" value="{{ current_year }}" min="2000" max="2100" class="filter-select">
+                </div>
+                <div class="filter-item">
+                     <button type="button" onclick="cargarDatos()">Cargar Datos</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="container-section summary-table">
+            <h3 class="section-title">Resumen Ingresos Presupuestados</h3>
+            <div class="table-responsive-wrapper">
+                <table id="incomeSummary">
+                    <thead>
+                        <tr>
+                            <th>Clase/Categoría</th>
+                            <th class="month-header">Ene</th><th class="month-header">Feb</th><th class="month-header">Mar</th>
+                            <th class="month-header">Abr</th><th class="month-header">May</th><th class="month-header">Jun</th>
+                            <th class="month-header">Jul</th><th class="month-header">Ago</th><th class="month-header">Sep</th>
+                            <th class="month-header">Oct</th><th class="month-header">Nov</th><th class="month-header">Dic</th>
+                            <th class="month-header">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot></tfoot>
+                </table>
+            </div>
+        </div>
+
+        <div class="container-section details-table">
+            <h3 class="section-title">Detalle Ingresos Presupuestados (T01)</h3>
+            <table id="incomeDetailsTable" class="display compact" style="width:100%;">
+                <thead>
+                    <tr>
+                        <th>Mes</th><th>Clase</th><th>Categoría</th><th>Proyecto</th>
+                        <th class="observations-header">Observaciones</th>
+                        <th>Importe</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="container-section summary-table">
+            <h3 class="section-title">Resumen Gastos Presupuestados</h3>
+            <div class="table-responsive-wrapper">
+                <table id="expensesSummary">
+                    <thead>
+                        <tr>
+                            <th>Clase/Categoría</th>
+                            <th class="month-header">Ene</th><th class="month-header">Feb</th><th class="month-header">Mar</th>
+                            <th class="month-header">Abr</th><th class="month-header">May</th><th class="month-header">Jun</th>
+                            <th class="month-header">Jul</th><th class="month-header">Ago</th><th class="month-header">Sep</th>
+                            <th class="month-header">Oct</th><th class="month-header">Nov</th><th class="month-header">Dic</th>
+                            <th class="month-header">Total</th>
+                        </tr>
+                    </thead>
+                     <tbody></tbody>
+                     <tfoot></tfoot>
+                </table>
+             </div>
+        </div>
+
+         <div class="container-section details-table">
+            <h3 class="section-title">Detalle Gastos Presupuestados (T02)</h3>
+            <table id="expensesDetailsTable" class="display compact" style="width:100%;">
+                <thead>
+                    <tr>
+                        <th>Mes</th><th>Clase</th><th>Categoría</th><th>Proyecto</th>
+                        <th class="observations-header">Observaciones</th>
+                        <th>Importe</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="container-section budget-input-table">
+            <h3 class="section-title">Alimentar Presupuesto</h3>
+            <div class="table-responsive-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fecha</th><th>Tipo</th><th>Clase</th><th>Categoría</th><th>Proyecto</th>
+                            <th class="observations-header-input">Observaciones</th>
+                            <th>Importe</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for i in range(12) %}
+                        <tr>
+                            <td><input type="date" name="Date"></td>
+                            <td>
+                                <select name="Type">
+                                    <option value=""></option>
+                                    {% for type_item in types %}
+                                        <option value="{{ type_item.id }}">{{ type_item.Item }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <select name="Class">
+                                    <option value=""></option>
+                                    {% for class_item in classes %}
+                                        <option value="{{ class_item.id }}">{{ class_item.Item }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <select name="Category">
+                                    <option value=""></option>
+                                    {% for category_item in categories %}
+                                        <option value="{{ category_item.id }}">{{ category_item.Item }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td><input type="text" name="Project"></td>
+                            <td class="observations-input-cell"><input type="text" name="Observations" maxlength="255"></td>
+                            <td><input type="number" step="0.01" name="Amount"></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+             </div>
+            <button onclick="guardarPresupuesto()">Guardar Presupuesto</button>
+        </div>
+    </div>
+
+    <script>
+        const currencyFormatter = new Intl.NumberFormat('es-ES', {
+            style: 'currency', currency: 'EUR', minimumFractionDigits: 2
+        });
+
+        $.ajaxSetup({ headers: { 'X-CSRFToken': $('meta[name="csrf-token"]').attr('content') } });
+
+        let incomeDataTable = null;
+        let expenseDataTable = null;
+
+        function cargarDatos() {
+            const year = document.getElementById('yearFilterBudget').value; // ID actualizado
+            console.log("Cargando datos para el año:", year);
+            fetch(`{{ url_for('finance.budget_summary') }}?year=${year}`)
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => { 
+                            throw new Error(`Error HTTP ${response.status}: ${text.substring(0, 300)}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Datos recibidos:", data);
+                    if (data.error) { 
+                        alert("Error cargando datos: " + data.error + (data.trace ? "\n" + data.trace.substring(0,500) : "")); 
+                        return; 
+                    }
+                    actualizarTablasResumen(data.income_summary || [], 'incomeSummary');
+                    actualizarTablasResumen(data.expense_summary || [], 'expensesSummary');
+                    actualizarTablasDetalle(data.income_details || [], 'incomeDetailsTable', 'income');
+                    actualizarTablasDetalle(data.expense_details || [], 'expensesDetailsTable', 'expense');
+                })
+                .catch(error => { 
+                    console.error('Error en fetch o procesando datos:', error); 
+                    alert('Error al cargar los datos del presupuesto: ' + error.message); 
+                });
+        }
+
+        function actualizarTablasResumen(summaryData, tableId) {
+            const table = document.getElementById(tableId);
+            const tbody = table.querySelector('tbody');
+            let tfoot = table.querySelector('tfoot');
+            
+            tbody.innerHTML = '';
+            if (!tfoot) { tfoot = document.createElement('tfoot'); table.appendChild(tfoot); }
+            tfoot.innerHTML = '';
+
+            if (!summaryData || summaryData.length === 0) {
+                const tr = tbody.insertRow();
+                const td = tr.insertCell();
+                td.colSpan = 14; // 1 (label) + 12 (meses) + 1 (total)
+                td.textContent = "No hay datos de resumen disponibles.";
+                td.style.textAlign = "center";
+                return;
+            }
+
+            const grouped = {};
+            summaryData.forEach(item => {
+                const key = `${item.class || 'Sin clase'} - ${item.category || 'Sin categoría'}`;
+                if (!grouped[key]) grouped[key] = Array(12).fill(0);
+                if (typeof item.month === 'number' && item.month >= 1 && item.month <= 12) {
+                    grouped[key][item.month - 1] = parseFloat(item.total) || 0;
+                }
+            });
+
+            let monthlyTotals = Array(12).fill(0);
+            let grandTotal = 0;
+
+            Object.entries(grouped).forEach(([label, meses]) => {
+                const rowTotal = meses.reduce((sum, val) => sum + val, 0);
+                grandTotal += rowTotal;
+                const tr = tbody.insertRow();
+                tr.insertCell().textContent = label;
+                meses.forEach((monto, index) => {
+                    const cell = tr.insertCell();
+                    cell.textContent = currencyFormatter.format(monto);
+                    cell.classList.add('numeric-cell');
+                    monthlyTotals[index] += monto;
+                });
+                const totalCell = tr.insertCell();
+                totalCell.textContent = currencyFormatter.format(rowTotal);
+                totalCell.classList.add('numeric-cell', 'total-cell'); // 'total-cell' es una clase genérica
+            });
+
+            if (Object.keys(grouped).length > 0) { // Solo añadir footer si hay datos
+                const trTotal = tfoot.insertRow();
+                trTotal.insertCell().textContent = 'TOTAL GENERAL';
+                monthlyTotals.forEach(total => {
+                    const cell = trTotal.insertCell();
+                    cell.textContent = currencyFormatter.format(total);
+                    cell.classList.add('numeric-cell');
+                });
+                const grandTotalCell = trTotal.insertCell();
+                grandTotalCell.textContent = currencyFormatter.format(grandTotal);
+                grandTotalCell.classList.add('numeric-cell', 'grand-total'); // 'grand-total' es clase genérica
+            }
+        }
+
+        function actualizarTablasDetalle(detailData, tableId, type) {
+            const existingTableRef = (type === 'income') ? 'incomeDataTable' : 'expenseDataTable';
+            if (window[existingTableRef]) { 
+                window[existingTableRef].destroy(); 
+                $(`#${tableId} tbody`).empty(); // Limpiar tbody explícitamente
+            }
+
+            if (!detailData || detailData.length === 0) {
+                 $(`#${tableId} tbody`).html(`<tr><td colspan="6" style="text-align:center;">No hay detalles disponibles.</td></tr>`);
+                 // Si no hay datos, no inicializar DataTable o inicializar con array vacío y mensaje
+                 window[existingTableRef] = $(`#${tableId}`).DataTable({
+                    data: [], // Array vacío
+                    columns: [ // Definir columnas para que la cabecera se muestre
+                        { title: 'Mes' }, { title: 'Clase' }, { title: 'Categoría' },
+                        { title: 'Proyecto' }, { title: 'Observaciones' }, { title: 'Importe' }
+                    ],
+                    searching: false, paging: false, info: false, // Deshabilitar controles si no hay datos
+                    language: { emptyTable: "No hay detalles disponibles." }
+                 });
+                 return;
+            }
+            
+            const columnsConfig = [
+                { data: 'month_name', title: 'Mes' },
+                { data: 'class_name', title: 'Clase' },
+                { data: 'category_name', title: 'Categoría' },
+                { data: 'project', title: 'Proyecto' },
+                { data: 'observations', title: 'Observaciones', className: 'observations-cell' },
+                { 
+                    data: 'amount', title: 'Importe', className: 'dt-body-right',
+                    render: function(data, type, row) {
+                        return type === 'display' ? currencyFormatter.format(data) : data;
+                    }
+                }
+            ];
+
+            const dtInstance = $(`#${tableId}`).DataTable({
+                destroy: true, 
+                data: detailData,
+                columns: columnsConfig,
+                paging: true, searching: true, info: true, pageLength: 10, // Reducir pageLength para tablas de detalle
+                lengthMenu: [ [10, 15, 25, 50, -1], [10, 15, 25, 50, "Todos"] ],
+                language: { url: "//cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json" },
+                order: [[ 0, 'asc' ]],
+                // scrollX: true // Añadir si las tablas de detalle son muy anchas
+            });
+
+            if (type === 'income') { incomeDataTable = dtInstance; }
+            else if (type === 'expense') { expenseDataTable = dtInstance; }
+        }
+
+        function guardarPresupuesto() {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+            let dataToSave = []; // Renombrado para evitar conflicto con variable 'data' global de DT
+            document.querySelectorAll(".budget-input-table tbody tr").forEach(row => {
+                const dateInput = row.querySelector("input[name='Date']");
+                const amountInput = row.querySelector("input[name='Amount']");
+                const typeSelect = row.querySelector("select[name='Type']");
+                const observationsInput = row.querySelector("input[name='Observations']");
+   
+                const date = dateInput ? dateInput.value : null;
+                const amountStr = amountInput ? amountInput.value : '';
+                const amount = (amountStr !== '' && !isNaN(parseFloat(amountStr))) ? parseFloat(amountStr) : null;
+                const typeValue = typeSelect ? typeSelect.value : null;
+                const observationsValue = observationsInput ? observationsInput.value : '';
+   
+                if (date && amount !== null && typeValue && typeValue !== "") { 
+                    dataToSave.push({
+                        Date: date, Type: typeValue,
+                        Class: row.querySelector("select[name='Class']").value,
+                        Category: row.querySelector("select[name='Category']").value,
+                        Project: row.querySelector("input[name='Project']").value,
+                        Observations: observationsValue, 
+                        Amount: amount
+                    });
+                 }
+            });
+   
+            console.log("Datos a guardar en presupuesto:", dataToSave);
+
+            if (dataToSave.length > 0) {
+                fetch('{{ url_for("finance.save_budget") }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                    body: JSON.stringify(dataToSave)
+                })
+                .then(response => {
+                    const contentType = response.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        return response.text().then(text => {
+                            throw new Error(`Respuesta no JSON del servidor: ${text.substring(0, 200)}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(responseData => { 
+                    if (responseData.error) { throw new Error(responseData.error); }
+                    alert(responseData.mensaje);
+                    if (responseData.actualizados > 0) {
+                        document.querySelectorAll(".budget-input-table tbody tr").forEach(row => {
+                            row.querySelectorAll("input, select").forEach(input => {
+                                if(input.tagName.toLowerCase() === 'select') input.selectedIndex = 0;
+                                else input.value = '';
+                            });
+                        });
+                        cargarDatos(); 
+                    }
+                 })
+                .catch(error => { 
+                    console.error('Error al guardar presupuesto:', error); 
+                    alert('Error al guardar el presupuesto: ' + error.message); 
+                });
+            } else {
+                alert("No hay filas válidas (con Fecha, Tipo e Importe) para guardar en el presupuesto.");
+            }
+        }
+   
+        document.addEventListener('DOMContentLoaded', cargarDatos);
+    </script>
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Transacciones sin categorizar ({{ transacciones|length }})</title>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <!-- Enlazar el archivo CSS externo -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+        <link rel="stylesheet" href="{{ url_for('finance.static', filename='css/styles.css') }}">
+    </head>
+<body>
+    <!-- Contenedor fijo para la barra de menú, título y select -->
+    <div class="fixed-header">
+        <!-- Barra de navegación -->
+        {% include 'navbar.html' %}
+
+        <h2 class="page-title">Transacciones sin categorizar ({{ transacciones|length }})</h2>
+
+        <!-- Select de Entity fuera de la tabla -->
+        <div class="entity-selector">
+            <label for="entity">Selecciona una entidad:</label>
+            <select id="entity" name="Entity">
+                {% for entity in entities %}
+                    <option value="{{ entity.id }}">{{ entity.IBAN }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <!-- Tabla de transacciones -->
+    <table>
+        <thead>
+            <tr>
+                <th>Op_Date</th>
+            	<th>Categoria</th>
+            	<th>Subcategoria</th>
+            	<th>Description</th>
+            	<th>Comentario</th>
+            	<th>Amount</th>
+            	<th>Type</th>
+            	<th>Class</th>
+            	<th>Category</th>
+            	<th>Detail</th>
+                <th>Company</th>
+            	<th>FreeText</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaccion in transacciones %}
+            <tr data-id="{{ transaccion.id }}">
+                <!-- Campos visibles sin edición -->
+            	<td class="op-date">{{ transaccion.Op_Date }}</td>
+            	<td>{{ transaccion.Categoria }}</td>
+            	<td>{{ transaccion.Subcategoria }}</td>
+            	<td>{{ transaccion.Description }}</td>
+            	<td>{{ transaccion.Comentario }}</td>
+            	<td class="amount">{{ transaccion.Amount }}</td>
+
+            	<!-- Campos editables -->
+                <td>
+                    <select name="Type">
+                        {% for type in types %}
+                            <option value="{{ type.id }}" {% if type.id == transaccion.Type %}selected{% endif %}>
+                                {{ type.Item }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td>
+                    <select name="Class">
+                        {% for class in classes %}
+                            <option value="{{ class.id }}" {% if class.id == transaccion.Class %}selected{% endif %}>
+                                {{ class.Item }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td>
+                    <select name="Category">
+                        {% for category in categories %}
+                            <option value="{{ category.id }}" {% if category.id == transaccion.Category %}selected{% endif %}>
+                                {{ category.Item }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </td>
+            	<td><input type="text" name="Detail" value=""></td>
+                <td><input type="text" name="Company" value=""></td>
+            	<td><input type="text" name="FreeText" value=""></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <button onclick="guardarCambios()">Guardar</button>
+
+    <script>
+        function guardarCambios() {
+            let data = [];
+            let totalRows = 0;
+            let includedRows = 0;
+
+            // Obtener el valor seleccionado de Entity una sola vez
+            const selectedEntity = document.getElementById('entity').value;
+
+            document.querySelectorAll("tbody tr").forEach(row => {
+                totalRows++;
+                let typeValue = row.querySelector("select[name='Type']").value;
+
+                // Solo considerar la transacción si Type no es vacío ni el valor del primer elemento (normalmente "")
+                if (typeValue && typeValue !== "" && typeValue !== "0" && typeValue !== "NULL") {
+                    let transaccion = {
+                        id: row.dataset.id,
+                        Entity: selectedEntity,
+                        Type: typeValue,
+                        Class: row.querySelector("select[name='Class']").value,
+                        Category: row.querySelector("select[name='Category']").value,
+                        Detail: row.querySelector("input[name='Detail']").value,
+                        Company: row.querySelector("input[name='Company']").value,
+                        FreeText: row.querySelector("input[name='FreeText']").value
+                    };
+                    data.push(transaccion);
+                    includedRows++;
+                }
+            });
+
+            console.log(`Total filas: ${totalRows}, Filas incluidas: ${includedRows}`);
+            console.log('Datos enviados:', data);
+
+            // Solo hacer la petición si hay datos para enviar
+            if (data.length > 0) {
+                fetch('{{ url_for("finance.actualizar_transacciones") }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json',
+                               'X-CSRFToken': '{{ csrf_token() }}'
+                     },
+                    body: JSON.stringify(data)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => {
+                            throw new Error(`HTTP error! status: ${response.status}, response: ${text}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(responseData => {
+                    console.log('Respuesta del servidor:', responseData);
+                    alert(responseData.mensaje);
+                    if (responseData.actualizados > 0) {
+                        window.location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al guardar los cambios: ' + error.message);
+                });
+            } else {
+                alert("No hay transacciones para actualizar. Asegúrate de seleccionar un Type válido para al menos una transacción.");
+            }
+        }
+
+        // Formatear la columna Amount y aplicar color si es negativo o positivo
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll("tbody tr").forEach(row => {
+                let cell = row.querySelector(".amount");
+                let value = parseFloat(cell.textContent.replace(',', '.'));
+                if (!isNaN(value)) {
+                    cell.textContent = value.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '€';
+                    if (value < 0) {
+                        row.classList.add("negative-amount");
+                    } else if (value > 0) {
+                        row.classList.add("positive-amount");
+                    }
+                }
+            });
+        });
+
+        // Script para ajustar el ancho de los selects
+        function ajustarAnchoSelects() {
+            document.querySelectorAll('select').forEach(select => {
+                const tempElement = document.createElement('span');
+                tempElement.style.visibility = 'hidden';
+                tempElement.style.whiteSpace = 'nowrap';
+                tempElement.style.fontSize = window.getComputedStyle(select).fontSize;
+                tempElement.style.fontFamily = window.getComputedStyle(select).fontFamily;
+                tempElement.textContent = select.options[select.selectedIndex].text;
+
+                document.body.appendChild(tempElement);
+                select.style.width = `${tempElement.offsetWidth + 30}px`;
+                document.body.removeChild(tempElement);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', ajustarAnchoSelects);
+        document.querySelectorAll('select').forEach(select => {
+            select.addEventListener('change', ajustarAnchoSelects);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Finanzas{% endblock %}
+
+{% block head_extra %}
+    <link rel="stylesheet" href="{{ url_for('finance.static', filename='css/styles.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="filters-section">
+        <h2>Filtros</h2>
+        <div class="filters-row">
+            <div class="filter-item">
+                <label for="year-filter">Año:</label>
+                <select id="year-filter" class="filter-select">
+                    <!-- Se llenará con JavaScript -->
+                </select>
+            </div>
+            <div class="filter-item">
+                <label for="month-filter">Mes:</label>
+                <select id="month-filter" class="filter-select">
+                    <option value="">Todos</option>
+                    <option value="1">Enero</option>
+                    <option value="2">Febrero</option>
+                    <option value="3">Marzo</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Mayo</option>
+                    <option value="6">Junio</option>
+                    <option value="7">Julio</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Septiembre</option>
+                    <option value="10">Octubre</option>
+                    <option value="11">Noviembre</option>
+                    <option value="12">Diciembre</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <label for="entity-filter">Entidad:</label>
+                <select id="entity-filter" class="filter-select">
+                    <option value="">Todas</option>
+                    <!-- Se llenará con JavaScript -->
+                </select>
+            </div>
+            <div class="filter-item">
+                <label for="type-filter">Tipo:</label>
+                <select id="type-filter" class="filter-select">
+                    <option value="">Todos</option>
+                    <!-- Se llenará con JavaScript -->
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="summary-cards">
+        <div class="card" id="total-card">
+            <h3>Total</h3>
+            <p class="amount" id="total-amount">0.00 €</p>
+        </div>
+        <div class="card" id="income-card">
+            <h3>Ingresos</h3>
+            <p class="amount" id="income-amount">0.00 €</p>
+        </div>
+        <div class="card" id="expense-card">
+            <h3>Gastos</h3>
+            <p class="amount" id="expense-amount">0.00 €</p>
+        </div>
+        <div class="card" id="investments-card">
+            <h3>Investments</h3>
+            <p class="amount" id="investments-amount">0.00 €</p>
+        </div>
+        <div class="card" id="quality-card">
+            <h3>Quality</h3>
+            <p class="amount" id="quality-amount">0.00 €</p>
+        </div>
+    </div>
+
+    <div class="charts-row">
+        <div class="chart-container">
+            <h3>Gastos por Categoría</h3>
+            <canvas id="categories-chart"></canvas>
+        </div>
+        <div class="chart-container">
+            <h3>Evolución Mensual</h3>
+            <canvas id="monthly-chart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Script para el dashboard -->
+<script src="{{ url_for('finance.static', filename='js/dashboard.js') }}"></script>
+
+<!-- Incluir Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+
+
+{% endblock %}

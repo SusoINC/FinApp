@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cargar Movimientos Bancarios</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('finance.static', filename='css/styles.css') }}">
+</head>
+<body>
+    {% include 'navbar.html' %}
+
+    <h2 class="page-title">Cargar Movimientos Bancarios</h2>
+
+    <div class="upload-container">
+        <form action="{{ url_for('finance.upload') }}" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            
+            <div class="form-group">
+                <label for="entity" id="entity-label">Entidad Bancaria:</label>
+                <select id="entity" name="entity" required aria-labelledby="entity-label">
+                    {% for entity in entities %}
+                        <option value="{{ entity.id }}">{{ entity.IBAN }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="file">Archivo Excel (.xls o .xlsx):</label>
+                <input type="file" id="file" name="file" 
+                       accept=".xls,.xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" 
+                       required
+                       onchange="document.getElementById('filename').textContent = this.files[0]?.name || 'Ningún archivo seleccionado'">
+                <p id="filename" class="file-info">Ningún archivo seleccionado</p>
+            </div>
+            
+            <div class="form-group">
+                <label for="sheet">Nombre de la hoja (dejar en blanco para la primera):</label>
+                <input type="text" id="sheet" name="sheet" placeholder="Primera hoja">
+            </div>
+            
+            <div class="form-group">
+                <label for="date_format">Formato de fecha:</label>
+                <select id="date_format" name="date_format">
+                    <option value="DD.MM.YYYY">DD.MM.YYYY (04.03.2025)</option>
+                    <option value="DD/MM/YYYY">DD/MM/YYYY (04/03/2025)</option>
+                    <option value="YYYY-MM-DD">YYYY-MM-DD (2025-03-04)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <button type="submit" id="submit-btn">Cargar Archivo</button>
+                <div id="loading" style="display: none;">
+                    <p>Procesando archivo, por favor espere...</p>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    {% if result %}
+    <div class="result-container">
+        <h3>Resultado de la carga:</h3>
+        <p>{{ result.message }}</p>
+        
+        {% if result.imported > 0 %}
+        <p>Registros importados: {{ result.imported }}</p>
+        {% endif %}
+        
+        {% if result.errors %}
+        <div class="errors">
+            <h4>Errores:</h4>
+            <ul>
+                {% for error in result.errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <script>
+        // Validación de archivo
+        function validateFile(input) {
+            const validExtensions = ['.xls', '.xlsx'];
+            const fileName = input.value;
+            const fileExt = fileName.substring(fileName.lastIndexOf('.')).toLowerCase();
+            
+            if (!validExtensions.includes(fileExt)) {
+                alert('Por favor sube solo archivos Excel (.xls, .xlsx)');
+                input.value = '';
+                document.getElementById('filename').textContent = 'Ningún archivo seleccionado';
+            }
+        }
+
+        // Mostrar loading y prevenir múltiples envíos
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const submitBtn = document.getElementById('submit-btn');
+            const loading = document.getElementById('loading');
+            
+            submitBtn.disabled = true;
+            loading.style.display = 'block';
+            
+            // Validación adicional del archivo
+            const fileInput = document.getElementById('file');
+            if (fileInput.files.length === 0) {
+                e.preventDefault();
+                alert('Por favor selecciona un archivo');
+                submitBtn.disabled = false;
+                loading.style.display = 'none';
+                return false;
+            }
+            
+            return true;
+        });
+
+        // Asignar validación al input file
+        document.getElementById('file').addEventListener('change', function() {
+            validateFile(this);
+        });
+    </script>
+</body>
+</html>

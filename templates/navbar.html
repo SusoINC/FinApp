@@ -1,0 +1,45 @@
+<!-- navbar.html -->
+<nav class="topbar">
+    <a href="{{ url_for('core.index') }}" class="home-icon">🏠</a>
+    
+    <ul class="nav-links">
+        <li class="nav-item">
+            <a href="{{ url_for('finance.dashboard') }}" class="nav-link">Dashboard</a>
+        </li>
+        
+        <li class="nav-item dropdown">
+            <span class="nav-link">Finanzas ▾</span>
+            <div class="dropdown-content">
+                <a href="{{ url_for('finance.budget_status') }}" class="dropdown-item">💸 Budget Status</a>
+                <a href="{{ url_for('finance.budget') }}" class="dropdown-item">🤓 Budget</a>
+                <a href="{{ url_for('finance.upload') }}" class="dropdown-item">📤 Importar</a>
+                <a href="{{ url_for('finance.categorize') }}" class="dropdown-item">🏷️ Categorizar</a>
+                <a href="{{ url_for('finance.edit_transactions') }}" class="dropdown-item">✏️ Editar</a>
+            </div>
+        </li>
+        
+        <li class="nav-item dropdown">
+            <span class="nav-link">Inversiones ▾</span>
+            <div class="dropdown-content">
+                <a href="{{ url_for('investment.investments') }}" class="dropdown-item">🤑 Nueva</a>
+                <a href="{{ url_for('investment.symbol_analysis') }}" class="dropdown-item">📈 Symbol Analysis</a>
+                <a href="{{ url_for('investment.wallet_analysis') }}" class="dropdown-item">💼 Wallet Analysis</a>
+                <a href="#" class="dropdown-item">⚙️ Config</a>
+            </div>
+        </li>
+
+        <li class="nav-item dropdown">
+            <span class="nav-link">Settings ▾</span>
+            <div class="dropdown-content">
+                <a href="http://192.168.1.224/phpmyadmin/" class="dropdown-item" target="_blank" rel="noreferrer noopener">🆕 phpmyadmin</a>
+                <a href="#" class="dropdown-item">📈 Analítica</a>
+                <a href="#" class="dropdown-item">⚙️ Config</a>
+            </div>
+        </li>
+
+    </ul>
+    
+    <button class="menu-toggle">☰</button>
+</nav>
+
+<script src="{{ url_for('static', filename='js/navbar.js') }}"></script>

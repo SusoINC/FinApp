@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alimentar Inversiones</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('investment.static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="fixed-header">
+        {% include 'navbar.html' %}
+        <h2 class="page-title">Alimentar Inversiones</h2>
+        <div class="wallet-selector">
+            <label for="wallet">Cartera:</label>
+            <select id="wallet" name="Wallet">
+                {% for wallet in wallets %}
+                    <option value="{{ wallet.id }}">{{ wallet.Name }}</option>
+                {% endfor %}
+            </select>
+            <label for="platform"> Plataforma:</label>
+            <select id="platform" name="Platform">
+                {% for platform in platforms %}
+                    <option value="{{ platform.id }}">{{ platform.Name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Símbolo</th>
+                <th>Importe</th>
+                <th>Comisión</th>
+                <th>Títulos</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in range(10) %}
+            <tr data-id="{{ i }}">
+                <td><input type="date" name="Date"></td>
+                <td>
+                    <select name="Symbol">
+                        {% for symbol in symbols %}
+                            <option value="{{ symbol.Symbol }}">{{ symbol.Description }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td><input type="number" step="0.01" name="Amount"></td>
+                <td><input type="number" step="0.0001" name="Fee"></td>
+                <td><input type="number" step="0.0000000001" name="Shares"></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <button onclick="guardarInversiones()">Guardar</button>
+
+    <script>
+        function guardarInversiones() {
+            let data = [];
+            const selectedWallet = document.getElementById('wallet').value;
+            const selectedPlatform = document.getElementById('platform').value;
+    
+            document.querySelectorAll("tbody tr").forEach(row => {
+                const date = row.querySelector("input[name='Date']").value;
+                const amount = row.querySelector("input[name='Amount']").value;
+    
+                // Solo incluir la transacción si Date y Amount están informados
+                if (date && amount) {
+                    let transaccion = {
+                        Wallet: selectedWallet,
+                        Platform: selectedPlatform,
+                        Date: date,
+                        Symbol: row.querySelector("select[name='Symbol']").value,
+                        Amount: amount,
+                        Fee: row.querySelector("input[name='Fee']").value || 0, // Si Fee está vacío, se asigna 0
+                        Shares: row.querySelector("input[name='Shares']").value
+                    };
+                    data.push(transaccion);
+                }
+            });
+    
+            console.log("Datos a enviar:", data); // <-- Depuración: Verificar los datos antes de enviar
+
+            if (data.length > 0) {
+                fetch('{{ url_for("investment.guardar_inversiones") }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json',
+                               'X-CSRFToken': '{{ csrf_token() }}'
+                     },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(responseData => {
+                    console.log("Respuesta del servidor:", responseData); // <-- Depuración: Verificar la respuesta
+
+                    alert(responseData.mensaje);
+                    if (responseData.actualizados > 0) {
+                        window.location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al guardar las inversiones: ' + error);
+                });
+            } else {
+                alert("No hay transacciones válidas para guardar. Asegúrate de informar la fecha y el importe.");
+            }
+        }
+    </script>
+</body>
+</html>

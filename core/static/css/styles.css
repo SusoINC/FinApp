@@ -1,0 +1,71 @@
+.dashboard-container .card { /* Ya tienes estilos para card en el global, aquí especificidad si es necesario */
+    flex: 1;
+    background-color: var(--background-section); /* Usar variable CSS */
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow-soft);
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 20px; /* Para layout de columna en móvil */
+}
+.dashboard-container .summary-cards {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 30px;
+    flex-wrap: wrap; /* Para que se ajusten en pantallas más pequeñas */
+}
+
+
+.dashboard-container .charts-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-wrap: wrap; /* Que los gráficos se pongan uno debajo de otro si no caben */
+}
+.dashboard-container .chart-container {
+    flex: 1;
+    min-width: 300px; /* Ancho mínimo para que no se aplasten demasiado */
+    background-color: var(--background-section);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow-soft);
+    padding: 20px;
+}
+.dashboard-container .chart-container h3 {
+    margin-top: 0;
+    color: var(--text-color-light);
+    font-size: 1.1em; /* Un poco más grande */
+    margin-bottom: 15px;
+}
+.dashboard-container canvas {
+    max-width: 100%; /* Asegurar que no se desborde */
+    /* height auto es manejado por chart.js con aspectRatio */
+}
+
+/* Responsive para Dashboard (ya lo tenías, ajustado un poco) */
+@media (max-width: 992px) { /* Tablets y móviles grandes */
+    .dashboard-container .charts-row {
+        flex-direction: column;
+    }
+}
+@media (max-width: 768px) { /* Móviles */
+    .dashboard-container .summary-cards {
+        flex-direction: column;
+    }
+}
+
+/* Colores de borde superior para tarjetas del dashboard */
+#total-card { border-top: 4px solid #4e79a7; }
+#income-card { border-top: 4px solid #59a14f; }
+#expense-card { border-top: 4px solid #e15759; }
+#investments-card { border-top: 4px solid #f28e2c; } /* Naranja para inversiones */
+#quality-card { border-top: 4px solid #76B7B2; }   /* Un teal para calidad */
+
+.dashboard-container .amount {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin: 10px 0 0;
+}
+#total-amount { color: #4e79a7; }
+#income-amount { color: #59a14f; }
+#expense-amount { color: #e15759; }
+#investments-amount { color: #f28e2c; }
+#quality-amount { color: #76B7B2; }

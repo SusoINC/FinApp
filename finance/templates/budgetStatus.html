@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estado del Presupuesto</title>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- DataTables CSS y JS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <!-- Tippy.js (para tooltips) -->
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css"/>
+    <!-- Tus CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('finance.static', filename='css/styles.css') }}">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    <div class="container page-container"> {# Usar page-container para el ancho máximo y centrado #}
+        <h2 class="page-title">Estado del Presupuesto vs Gastos Reales</h2>
+        
+        <div class="filters-section container-section"> {# Usar container-section para padding y fondo #}
+            <div class="filter-item">
+                <label for="yearFilter">Año:</label>
+                <input type="number" id="yearFilter" value="{{ datetime.now().year }}" min="2020" max="2030">
+                <button onclick="loadBudgetData()">Cargar Datos</button>
+            </div>
+        </div>
+        
+        <div class="container-section"> {# Envolver la tabla para padding y fondo #}
+            <table id="statusTable" class="display compact">
+                <thead>
+                    <tr>
+                        <th>Clase - Categoría</th>           <!-- Col 0 -->
+                        
+                        <th>Ene</th>                         <!-- Col 2 -->
+                        <th>Feb</th>                         <!-- Col 3 -->
+                        <th>Mar</th>                         <!-- Col 4 -->
+                        <th>Abr</th>                         <!-- Col 5 -->
+                        <th>May</th>                         <!-- Col 6 -->
+                        <th>Jun</th>                         <!-- Col 7 -->
+                        <th>Jul</th>                         <!-- Col 8 -->
+                        <th>Ago</th>                         <!-- Col 9 -->
+                        <th>Sep</th>                         <!-- Col 10 -->
+                        <th>Oct</th>                         <!-- Col 11 -->
+                        <th>Nov</th>                         <!-- Col 12 -->
+                        <th>Dic</th>                         <!-- Col 13 -->
+                        <th class="total-amount-column">Gastado Total Fila</th>   <!-- Col 14 -->
+                        <th class="total-amount-column">Presup. Total Fila</th>   <!-- Col 15 -->
+                        <th class="total-percentage-column">Total %</th>     <!-- Col 1 (MOVIDA) -->
+                    </tr>
+                </thead>
+                <tbody></tbody>
+                <tfoot>
+                    {# NUEVA FILA PARA GASTADO TOTAL POR MES Y GENERAL #}
+                    <tr class="footer-row-gastado">
+                        <th>Total Gastado (Mes / General)</th>
+                        <th class="footer-overall-total-percentage currency-cell"></th> <!-- Celda para el % general de gasto sobre presupuesto -->
+                        <th class="footer-amount-total currency-cell"></th> <!-- Ene -->
+                        <th class="footer-amount-total currency-cell"></th> <!-- Feb -->
+                        <th class="footer-amount-total currency-cell"></th> <!-- Mar -->
+                        <th class="footer-amount-total currency-cell"></th> <!-- Abr -->
+                        <th class="footer-amount-total currency-cell"></th> <!-- May -->
+                        <th class="footer-amount-total currency-cell"></th> <!-- Jun -->
+                        <th class="footer-amount-total currency-cell"></th> <!-- Jul -->
+                        <th class="footer-amount-total currency-cell"></th> <!-- Ago -->
+                        <th class="footer-amount-total currency-cell"></th> <!-- Sep -->
+                        <th class="footer-amount-total currency-cell"></th> <!-- Oct -->
+                        <th class="footer-amount-total currency-cell"></th> <!-- Nov -->
+                        <th class="footer-amount-total currency-cell"></th> <!-- Dic -->
+                        <th class="footer-amount-total currency-cell"></th> <!-- Suma de "Gastado Total Fila" -->
+                        <th class="footer-amount-total currency-cell"></th> <!-- Vacía o Suma de "Presup. Total Fila" si se quiere aquí también -->
+                    </tr>
+                     {# NUEVA FILA PARA PRESUPUESTADO TOTAL POR MES Y GENERAL #}
+                    <tr class="footer-row-presupuestado">
+                        <th>Total Presupuestado (Mes / General)</th>
+                        <th class="footer-overall-total-percentage"></th> <!-- Vacía o para otro dato si se quiere -->
+                        <th class="footer-amount-total currency-cell"></th> <!-- Ene -->
+                        <th class="footer-amount-total currency-cell"></th> <!-- Feb -->
+                        <th class="footer-amount-total currency-cell"></th> <!-- Mar -->
+                        <th class="footer-amount-total currency-cell"></th> <!-- Abr -->
+                        <th class="footer-amount-total currency-cell"></th> <!-- May -->
+                        <th class="footer-amount-total currency-cell"></th> <!-- Jun -->
+                        <th class="footer-amount-total currency-cell"></th> <!-- Jul -->
+                        <th class="footer-amount-total currency-cell"></th> <!-- Ago -->
+                        <th class="footer-amount-total currency-cell"></th> <!-- Sep -->
+                        <th class="footer-amount-total currency-cell"></th> <!-- Oct -->
+                        <th class="footer-amount-total currency-cell"></th> <!-- Nov -->
+                        <th class="footer-amount-total currency-cell"></th> <!-- Dic -->
+                        <th class="footer-amount-total currency-cell"></th> <!-- Vacía o Suma de "Gastado Total Fila" si se quiere aquí también -->
+                        <th class="footer-amount-total currency-cell"></th> <!-- Suma de "Presup. Total Fila" -->
+                    </tr>
+                    {# FILA EXISTENTE PARA PORCENTAJES MENSUALES Y PROMEDIO GENERAL #}
+                    <tr class="footer-row-porcentaje">
+                        <th>Totales % (Mes / Promedio General)</th>
+                        <th class="footer-overall-total-percentage"></th> <!-- Footer para "Total %" de filas (Col 1) -->
+                        <th class="footer-month-total-percentage"></th> <!-- Ene -->
+                        <th class="footer-month-total-percentage"></th> <!-- Feb -->
+                        <th class="footer-month-total-percentage"></th> <!-- Mar -->
+                        <th class="footer-month-total-percentage"></th> <!-- Abr -->
+                        <th class="footer-month-total-percentage"></th> <!-- May -->
+                        <th class="footer-month-total-percentage"></th> <!-- Jun -->
+                        <th class="footer-month-total-percentage"></th> <!-- Jul -->
+                        <th class="footer-month-total-percentage"></th> <!-- Ago -->
+                        <th class="footer-month-total-percentage"></th> <!-- Sep -->
+                        <th class="footer-month-total-percentage"></th> <!-- Oct -->
+                        <th class="footer-month-total-percentage"></th> <!-- Nov -->
+                        <th class="footer-month-total-percentage"></th> <!-- Dic -->
+                        <th class="footer-amount-total"></th>         <!-- Vacía -->
+                        <th class="footer-amount-total"></th>         <!-- Vacía -->
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // ... (window.budgetAppConfig, monthKeys, formatCurrency, applyPercentageColor, setTippyTooltip, renderMonthCell - sin cambios) ...
+        // Asegúrate que estas funciones estén definidas como en la versión anterior.
+        
+        window.budgetAppConfig = window.budgetAppConfig || {};
+        window.budgetAppConfig.currentYear = {{ datetime.now().year }};
+        window.budgetAppConfig.currentMonth = {{ datetime.now().month }};
+
+        let budgetDataTable = null;
+        const monthKeys = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+        function formatCurrency(amount) {
+            if (typeof amount !== 'number' || isNaN(amount)) amount = 0;
+            return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(amount);
+        }
+
+        function applyPercentageColor(cell, percentage, displayString, cellData = null) {
+            cell.removeClass('budget-future-month budget-zero-actual budget-low-actual budget-on-target budget-over-moderate budget-over-high budget-unbudgeted-expense-perc');
+            if (cellData && cellData.is_future_month && displayString === "-") {
+                cell.addClass('budget-future-month'); return;
+            }
+            if (displayString === "999%") { cell.addClass('budget-unbudgeted-expense-perc');
+            } else if (percentage !== null && !isNaN(percentage)) {
+                if (cellData && cellData.actual_amount === 0 && cellData.budget_amount > 0 && cellData.is_current_or_past_month) {
+                     cell.addClass('budget-zero-actual');
+                } else if (percentage >= 0 && percentage < 60) { cell.addClass('budget-low-actual');
+                } else if (percentage >= 60 && percentage <= 100) { cell.addClass('budget-on-target');
+                } else if (percentage > 100 && percentage <= 150) { cell.addClass('budget-over-moderate');
+                } else if (percentage > 150) { cell.addClass('budget-over-high'); }
+            }
+        }
+        
+        function setTippyTooltip(element, content) {
+            if (element._tippy) { element._tippy.setContent(content);
+            } else {
+                tippy(element, { content: content, allowHTML: true, theme: 'light-border', placement: 'top', arrow: true });
+            }
+        }
+
+        function renderMonthCell(data, type, row, meta) {
+            if (!data) return (type === 'display' ? "-" : null);
+            const budget = data.budget_amount; const actual = data.actual_amount;
+            let percentage = null; let displayString = "-"; let sortValue = null; 
+            if (budget > 0) {
+                percentage = (actual / budget) * 100; sortValue = percentage;
+                if (data.is_current_or_past_month && actual === 0) { displayString = "0%"; }
+                else if (data.is_future_month && actual === 0) { displayString = "-"; sortValue = -1000001; } 
+                else { displayString = `${Math.round(percentage)}%`; }
+            } else { 
+                if (actual > 0) { displayString = "999%"; sortValue = 999999; } 
+                else { 
+                    displayString = "-"; 
+                    if (data.is_future_month) { sortValue = -1000003; } else { sortValue = -1000002; }
+                }
+            }
+            if (type === 'display') return displayString;
+            if (type === 'sort' || type === 'type') return sortValue; 
+            return displayString;
+        }
+
+        function loadBudgetData() {
+            const year = parseInt($('#yearFilter').val());
+            
+            if (budgetDataTable) {
+                $('#statusTable tbody td, #statusTable tfoot th').each(function() {
+                    if (this._tippy) this._tippy.destroy();
+                });
+                budgetDataTable.destroy();
+                $('#statusTable tbody').empty(); 
+            }
+            
+            budgetDataTable = $('#statusTable').DataTable({
+                processing: true,
+                ajax: { /* ... (igual que antes) ... */
+                    url: "{{ url_for('finance.api_budget_status_data') }}", type: 'GET', data: { year: year },
+                    dataSrc: function(json) {
+                        if (json.error) { console.error("Error API:", json.error, json.message); alert("Error: " + (json.message || json.error)); return []; }
+                        if (!Array.isArray(json)) { console.error("Respuesta API no array:", json); alert("Error: Datos inesperados."); return []; }
+                        return json;
+                    }
+                },
+                columns: [ // Definición de columnas como en la versión anterior (Total % es la col 1)
+                    { data: 'category_display_name', title: 'Clase - Categoría', className: 'category-column' }, // Col 0
+                    
+                    ...monthKeys.map((monthKey) => ({ data: monthKey, title: monthKey, render: renderMonthCell, className: 'percentage-cell', createdCell: function(td, cellData, rowData) { let d = "-", p = null; if (cellData) { const b = cellData.budget_amount, a = cellData.actual_amount; if (b > 0) { p = (a / b) * 100; if (cellData.is_current_or_past_month && a === 0) d = "0%"; else if (cellData.is_future_month && a === 0) d = "-"; else d = `${Math.round(p)}%`; } else if (a > 0) d = "999%"; else d = "-"; } applyPercentageColor($(td), p, d, cellData); setTippyTooltip(td, cellData ? `Presupuestado: ${formatCurrency(cellData.budget_amount)}\nGastado: ${formatCurrency(cellData.actual_amount)}` : "N/A"); }})), // Cols 2-13
+                    { data: 'sum_actual_amount_row', title: 'Gastado Total Fila', className: 'currency-cell total-amount-column', render: function(data, type) { return type === 'display' ? formatCurrency(data) : data; }, createdCell: function(td, cellData, rowData) { $(td).removeClass('budget-future-month budget-zero-actual budget-low-actual budget-on-target budget-over-moderate budget-over-high budget-unbudgeted-expense-perc'); if (rowData.sum_actual_amount_row > rowData.sum_budget_amount_row && rowData.sum_budget_amount_row > 0) $(td).addClass('sum-actual-over-budget'); setTippyTooltip(td, `Gastado: ${formatCurrency(rowData.sum_actual_amount_row)}\nPresupuestado: ${formatCurrency(rowData.sum_budget_amount_row)}`); }}, // Col 14
+                    { data: 'sum_budget_amount_row', title: 'Presup. Total Fila', className: 'currency-cell total-amount-column', render: function(data, type) { return type === 'display' ? formatCurrency(data) : data; }, createdCell: function(td, cellData, rowData) { $(td).removeClass('budget-future-month budget-zero-actual budget-low-actual budget-on-target budget-over-moderate budget-over-high budget-unbudgeted-expense-perc sum-actual-over-budget'); setTippyTooltip(td, `Gastado: ${formatCurrency(rowData.sum_actual_amount_row)}\nPresupuestado: ${formatCurrency(rowData.sum_budget_amount_row)}`); }}, // Col 15
+                    { data: 'row_total_percentage', title: 'Total %', className: 'percentage-cell total-percentage-column', render: function(data, type) { return type === 'display' && data !== null && !isNaN(data) ? `${Math.round(data)}%` : (type === 'display' ? "-" : data) ; }, createdCell: function(td, cellData, rowData) { applyPercentageColor($(td), cellData, cellData === null || isNaN(cellData) ? "-" : `${Math.round(cellData)}%`); setTippyTooltip(td, `Promedio Fila: ${cellData !== null && !isNaN(cellData) ? Math.round(cellData) + '%' : '-'}\nTotal Gastado (Fila): ${formatCurrency(rowData.sum_actual_amount_row)}\nTotal Presup. (Fila): ${formatCurrency(rowData.sum_budget_amount_row)}`); }} // Col 1
+                ],
+                language: { /* ... */ },
+                paging: true, pageLength: 25, lengthMenu: [ [25, 50, 100, -1], [25, 50, 100, "Todos"] ],
+                ordering: true, order: [[0, 'asc']], autoWidth: false,
+                footerCallback: function (row, data, start, end, display) {
+                    var api = this.api();
+                    const yearSelected = parseInt($('#yearFilter').val());
+                    const serverCurrentYear = window.budgetAppConfig.currentYear;
+                    const serverCurrentMonth = window.budgetAppConfig.currentMonth;
+   
+                    // Sumas para toda la página actual
+                    let pageTotalSumActual_GastadoTotalFila = 0;
+                    let pageTotalSumBudget_PresupTotalFila = 0;
+                    let pageSumOfRowTotalPercentages = 0;
+                    let pageCountOfRowTotalPercentages = 0;
+
+                    api.rows({ page: 'current' }).data().each(function(rowData) {
+                        pageTotalSumActual_GastadoTotalFila += (rowData.sum_actual_amount_row || 0);
+                        pageTotalSumBudget_PresupTotalFila += (rowData.sum_budget_amount_row || 0);
+                        if (rowData.row_total_percentage !== null && !isNaN(rowData.row_total_percentage)) {
+                            pageSumOfRowTotalPercentages += rowData.row_total_percentage;
+                            pageCountOfRowTotalPercentages++;
+                        }
+                    });
+
+                    // --- Fila Footer: Total Gastado (Montos) ---
+                    const gastadoFooterCells = $(api.table().footer()).find('.footer-row-gastado th');
+                    // Col 1 de esta fila (debajo de "Total %" de filas): % Gasto General
+                    let percGastoGeneralVal = null;
+                    let percGastoGeneralDisp = "-";
+                    if(pageTotalSumBudget_PresupTotalFila > 0) {
+                        percGastoGeneralVal = (pageTotalSumActual_GastadoTotalFila / pageTotalSumBudget_PresupTotalFila) * 100;
+                        percGastoGeneralDisp = `${Math.round(percGastoGeneralVal)}%`;
+                    } else if (pageTotalSumActual_GastadoTotalFila > 0) {
+                        percGastoGeneralDisp = "999%"; percGastoGeneralVal = 999;
+                    }
+                    $(gastadoFooterCells[1]).html(percGastoGeneralDisp); // Indice 1 para la segunda celda
+                    applyPercentageColor($(gastadoFooterCells[1]), percGastoGeneralVal, percGastoGeneralDisp);
+                    setTippyTooltip(gastadoFooterCells[1], `Gasto General vs Presupuesto General (Pág.):\nTotal Gastado: ${formatCurrency(pageTotalSumActual_GastadoTotalFila)}\nTotal Presupuestado: ${formatCurrency(pageTotalSumBudget_PresupTotalFila)}`);
+
+
+                    // --- Fila Footer: Total Presupuestado (Montos) ---
+                    const presupFooterCells = $(api.table().footer()).find('.footer-row-presupuestado th');
+                    // Col 1 de esta fila: vacía o lo que quieras.
+                     $(presupFooterCells[1]).html(''); // Dejar vacía la celda debajo de "Total %" para esta fila
+
+
+                    // --- Fila Footer: Totales % (Meses y Promedio) ---
+                    const porcFooterCells = $(api.table().footer()).find('.footer-row-porcentaje th');
+                    // Col 1 de esta fila (debajo de "Total %" de filas): Promedio de los "Total %" de las filas
+                    let avgRowTotalPercentageVal = null;
+                    let avgRowTotalPercentageDisp = "-";
+                    if (pageCountOfRowTotalPercentages > 0) {
+                        avgRowTotalPercentageVal = pageSumOfRowTotalPercentages / pageCountOfRowTotalPercentages;
+                        avgRowTotalPercentageDisp = `${Math.round(avgRowTotalPercentageVal)}%`;
+                    }
+                    $(porcFooterCells[1]).html(avgRowTotalPercentageDisp);
+                    applyPercentageColor($(porcFooterCells[1]), avgRowTotalPercentageVal, avgRowTotalPercentageDisp);
+                    setTippyTooltip(porcFooterCells[1], `Promedio de "Total %" de Filas (Pág.): ${avgRowTotalPercentageDisp}`);
+
+
+                    // Calcular y rellenar para cada mes y las sumas totales de fila
+                    for (let i = 0; i < monthKeys.length; i++) { // Para Ene-Dic
+                        const monthKey = monthKeys[i]; 
+                        const actualColIdx = i + 2; // Los meses empiezan en la col 2
+                        
+                        let monthSumActual = 0, monthSumBudget = 0;
+                        api.rows({ page: 'current' }).data().each(function (rowData) {
+                            const cellData = rowData[monthKey];
+                            if (cellData) {
+                                const monthNum = i + 1;
+                                const isFuture = (yearSelected === serverCurrentYear && monthNum > serverCurrentMonth);
+                                if (!isFuture) {
+                                    monthSumActual += (cellData.actual_amount || 0);
+                                    monthSumBudget += (cellData.budget_amount || 0);
+                                }
+                            }
+                        });
+                        $(gastadoFooterCells[actualColIdx]).html(formatCurrency(monthSumActual));
+                        setTippyTooltip(gastadoFooterCells[actualColIdx], `Total Gastado ${monthKey} (Pág.): ${formatCurrency(monthSumActual)}`);
+
+                        $(presupFooterCells[actualColIdx]).html(formatCurrency(monthSumBudget));
+                        setTippyTooltip(presupFooterCells[actualColIdx], `Total Presup. ${monthKey} (Pág.): ${formatCurrency(monthSumBudget)}`);
+
+                        let monthPercVal = null, monthPercDisp = "-";
+                        if (monthSumBudget > 0) {
+                            monthPercVal = (monthSumActual / monthSumBudget) * 100;
+                            monthPercDisp = `${Math.round(monthPercVal)}%`;
+                        } else if (monthSumActual > 0) {
+                            monthPercDisp = "999%"; monthPercVal = 999;
+                        }
+                        $(porcFooterCells[actualColIdx]).html(monthPercDisp);
+                        applyPercentageColor($(porcFooterCells[actualColIdx]), monthPercVal, monthPercDisp);
+                        setTippyTooltip(porcFooterCells[actualColIdx], `Total % ${monthKey} (Pág.): ${monthPercDisp}\nB: ${formatCurrency(monthSumBudget)}, A: ${formatCurrency(monthSumActual)}`);
+                    }
+
+                    // Footer para sum_actual_amount_row (Col 14) y sum_budget_amount_row (Col 15)
+                    $(gastadoFooterCells[14]).html(formatCurrency(pageTotalSumActual_GastadoTotalFila)); // Col 14 de la fila Gastado
+                     setTippyTooltip(gastadoFooterCells[14], `Suma de "Gastado Total Fila" (Pág.): ${formatCurrency(pageTotalSumActual_GastadoTotalFila)}`);
+                    
+                    $(presupFooterCells[15]).html(formatCurrency(pageTotalSumBudget_PresupTotalFila)); // Col 15 de la fila Presupuestado
+                    setTippyTooltip(presupFooterCells[15], `Suma de "Presup. Total Fila" (Pág.): ${formatCurrency(pageTotalSumBudget_PresupTotalFila)}`);
+
+                    // Celdas vacías en la fila de porcentajes para las columnas de montos totales
+                    $(porcFooterCells[14]).html('');
+                    $(porcFooterCells[15]).html('');
+                }
+            });
+        }
+        
+        $(document).ready(function() { 
+            loadBudgetData(); 
+        });
+    </script>
+</body>
+</html>

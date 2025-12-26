@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis de Símbolos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('investment.static', filename='css/styles.css') }}">
+</head>
+<body>
+    {% include 'navbar.html' %}
+
+    <div class="content">
+        <div class="dashboard-container">
+            <!-- Selector de Símbolo -->
+            <div class="filters-section">
+                <h2>Filtros</h2>
+                <div class="filters-row">
+                    <div class="filter-item">
+                        <label for="wallet-select">Cartera:</label>
+                        <select id="wallet-select" class="filter-select">
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label for="platform-select"> Plataforma:</label>
+                        <select id="platform-select" class="filter-select">
+                            <option value="">Todas</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tarjetas de Métricas -->
+            <div class="summary-cards">
+                <div class="card" id="amount-invested-card">
+                    <h3>Total invertido</h3>
+                    <p class="amount" id="amount-invested">-</p>
+                </div>
+                <div class="card" id="symbols-card">
+                    <h3>Símbolos</h3>
+                    <p class="amount" id="symbols-count">-</p>
+                </div>
+                <div class="card" id="platform-card">
+                    <h3>Plataformas</h3>
+                    <p class="amount" id="platform-count">-</p>
+                </div>
+                <div class="card" id="available-card">
+                    <h3>Disponible</h3>
+                    <p class="amount" id="amount-available">-</p>
+                </div>
+                <div class="card" id="performance-card">
+                    <h3>Rendimiento</h3>
+                    <p class="amount" id="performance">-</p>
+                </div>
+                <div class="card" id="anaul-performance-card">
+                    <h3>Anualizado</h3>
+                    <p class="amount" id="anual-performance">-</p>
+                </div>
+            </div>
+
+            <!-- Filtros de Fecha -->
+            <div class="filters-section" style="margin-top:20px">
+                <div class="filters-row">
+                    <div class="filter-item">
+                        <label for="start-date">Desde:</label>
+                        <input type="date" id="start-date" class="filter-select">
+                    </div>
+                    <div class="filter-item">
+                        <label for="end-date">Hasta:</label>
+                        <input type="date" id="end-date" class="filter-select">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráficos -->
+            <div class="charts-row">
+                <div class="chart-container">
+                    <h3>Cantidad invertida</h3>
+                    <canvas id="invested-chart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Cantidad disponible</h3>
+                    <canvas id="performance-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+    <script src="{{ url_for('investment.static', filename='js/walletAnalysis.js') }}"></script>
+</body>
+</html>

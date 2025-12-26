@@ -1,0 +1,260 @@
+/* static/css/styles.css */
+
+/* Variables CSS (Sugerencia de Mejora) */
+:root {
+    --primary-color: #3498db; /* Azul principal */
+    --primary-color-dark: #2980b9;
+    --secondary-color: #2ecc71; /* Verde para acciones positivas */
+    --secondary-color-dark: #27ae60;
+    --danger-color: #e74c3c;   /* Rojo para errores/alertas */
+    --warning-color: #f39c12;  /* Naranja/Amarillo para advertencias */
+    
+    --text-color-dark: #2c3e50;
+    --text-color-light: #555;
+    --text-color-headings: #34495e;
+
+    --background-light: #f4f7f6;
+    --background-section: #ffffff;
+    --border-color: #e0e6ed;
+    --border-color-darker: #ced4da;
+
+    --font-family-sans-serif: Arial, sans-serif; /* O la que prefieras */
+    --base-font-size: 16px;
+    --base-line-height: 1.6;
+
+    --navbar-height: 60px;
+    --border-radius: 5px;
+    --box-shadow-soft: 0 3px 8px rgba(0,0,0,0.08);
+}
+
+/* Reseteo básico y estilos base */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family-sans-serif);
+    font-size: var(--base-font-size);
+    line-height: var(--base-line-height);
+    color: var(--text-color-dark);
+    background-color: var(--background-light);
+    margin: 0;
+    padding-top: var(--navbar-height); /* Espacio para navbar fija */
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+a:hover {
+    color: var(--primary-color-dark);
+    text-decoration: underline;
+}
+
+/* Contenedores y Secciones */
+.page-container { 
+    max-width: 95%; 
+    margin: 20px auto; 
+    padding: 0; 
+}
+.container-section { 
+    padding: 25px;
+    background-color: var(--background-section);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow-soft);
+    margin-bottom: 30px; 
+}
+
+/* Títulos */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-color-headings);
+    margin-top: 0;
+    margin-bottom: 0.75em; /* Espacio inferior consistente */
+    font-weight: 500;
+}
+h2.page-title { 
+    text-align: center; 
+    margin-bottom: 30px;
+    font-size: 2em; 
+    font-weight: 600;
+}
+h3.section-title { 
+    margin-bottom: 25px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #eef2f5; 
+    font-size: 1.5em;
+}
+
+/* Formularios y Botones Base (puedes expandir esto) */
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="file"],
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color-darker);
+    border-radius: var(--border-radius);
+    font-size: 0.95em;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+input:focus, select:focus {
+    border-color: var(--primary-color);
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(var(--primary-color-rgb, 52, 152, 219), 0.25); /* Necesitarías definir --primary-color-rgb o usar el color directamente */
+}
+
+button, .button { /* Clase .button para <a> que parezcan botones */
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 1em;
+    font-weight: 500;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: var(--border-radius);
+    color: #fff;
+    background-color: var(--primary-color);
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    text-decoration: none; /* Para <a> con clase .button */
+}
+button:hover, .button:hover {
+    background-color: var(--primary-color-dark);
+    color: #fff;
+    text-decoration: none;
+}
+button:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+/* Estilos de Tabla Globales */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background-color: var(--background-section); /* Fondo blanco para tablas */
+}
+table thead th {
+    background-color: var(--primary-color) !important; /* Azul para TODAS las cabeceras de tabla */
+    color: white !important;
+    padding: 12px 15px;
+    text-align: left !important; /* Alineación izquierda por defecto para cabeceras */
+    font-size: 0.98em;
+    font-weight: 600;
+    border: 1px solid var(--primary-color-dark);
+    letter-spacing: 0.5px;
+    /* No más position:sticky aquí globalmente */
+}
+/* Si quieres que algunas cabeceras (ej. meses) estén centradas: */
+table thead th.text-center {
+    text-align: center !important;
+}
+table thead th.text-right {
+    text-align: right !important;
+}
+
+
+table tbody td, table tfoot th, table tfoot td {
+    border: 1px solid var(--border-color);
+    padding: 10px 12px;
+    font-size: 0.92em;
+    vertical-align: middle;
+}
+table tbody td:first-child, table tfoot th:first-child {
+    text-align: left;
+    font-weight: 500;
+}
+.numeric-cell, .currency-cell, table td.dt-body-right { /* Para DataTables y celdas numéricas manuales */
+    text-align: right !important;
+}
+
+/* Filtros */
+.filters-section { 
+    /* background-color: #f8f9fa; Se hereda de container-section o se puede poner explícito */
+    /* border-radius: var(--border-radius); Ya en container-section */
+    padding: 20px; 
+    margin-bottom: 30px; 
+}
+.filters-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* Más espacio */
+    align-items: flex-end; /* Alinear items al final para que labels y inputs se alineen bien */
+}
+.filter-item {
+    flex: 1; /* Que los items intenten ocupar espacio */
+    min-width: 180px; /* Ancho mínimo */
+}
+.filter-item label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    font-size: 0.9em;
+    color: var(--text-color-light);
+}
+
+/* Contenedor para tablas con scroll horizontal */
+.table-responsive-wrapper {
+    overflow-x: auto;
+    margin-bottom: 15px; 
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+}
+/* DataTables: Evitar doble margen con wrapper de scroll */
+.dataTables_wrapper .dataTables_scrollHead table.dataTable {
+    margin-bottom: 0px !important; 
+}
+
+/* Tippy.js Tooltip Styles (globales si se usan en toda la app) */
+[data-tippy-content] { cursor: help; }
+.tippy-box[data-theme~='light-border'] {
+    border: 1px solid var(--border-color-darker);
+    font-size: 0.9em;
+    box-shadow: var(--box-shadow-soft);
+    background-color: var(--background-section);
+}
+.tippy-content {
+    padding: 8px 12px;
+    white-space: pre-line; 
+    text-align: left;
+    color: var(--text-color-dark);
+}
+.tippy-arrow {
+    color: var(--background-section); 
+}
+.tippy-box[data-theme~='light-border'][data-placement^='top'] > .tippy-arrow::before {
+    border-top-color: var(--border-color-darker); 
+}
+.tippy-box[data-theme~='light-border'][data-placement^='bottom'] > .tippy-arrow::before {
+    border-bottom-color: var(--border-color-darker);
+}
+
+/* Estilos para mensajes de error (como en upload.html) */
+.errors-container { /* Cambiado de .errors para evitar colisión con DataTables */
+    margin-top: 15px;
+    padding: 10px 15px;
+    background-color: rgba(231, 76, 60, 0.1); /* Rojo claro */
+    border-left: 4px solid var(--danger-color);
+    border-radius: var(--border-radius);
+}
+.errors-container h4 {
+    color: var(--danger-color);
+    margin-top: 0;
+    margin-bottom: 8px;
+    font-size: 1.1em;
+}
+.errors-container ul {
+    margin: 0;
+    padding-left: 20px;
+    list-style-type: disc;
+}
+.errors-container li {
+    color: var(--danger-color);
+    margin-bottom: 4px;
+    font-size: 0.95em;
+}
