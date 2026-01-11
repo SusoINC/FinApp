@@ -127,7 +127,8 @@
         window.budgetAppConfig.currentMonth = {{ datetime.now().month }};
 
         let budgetDataTable = null;
-        const monthKeys = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        const monthKeys = ['01-Ene', '02-Feb', '03-Mar', '04-Abr', '05-May', '06-Jun', 
+                           '07-Jul', '08-Ago', '09-Sep', '10-Oct', '11-Nov', '12-Dic'];
 
         function formatCurrency(amount) {
             if (typeof amount !== 'number' || isNaN(amount)) amount = 0;

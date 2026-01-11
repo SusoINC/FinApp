@@ -38,7 +38,7 @@ def categorize():
                              FreeText 
                       FROM Transact 
                       WHERE (Type IS NULL OR Type = '') AND 
-                            YEAR(Op_Date) = 2025
+                            YEAR(Op_Date) > 2024
                       ORDER BY Op_Date ASC""")
     transacciones = cursor.fetchall()
 
@@ -328,7 +328,6 @@ def process_excel_file(filepath, entity_id, date_format, sheet_name, conn):
             'imported': 0,
             'errors': [str(e)]
         }
-
 
 @finance_bp.route('/dashboard')
 def dashboard():
@@ -713,8 +712,8 @@ def budget_summary():
         
         # Mapeo de número de mes a nombre corto
         month_map = {
-            1: 'Ene', 2: 'Feb', 3: 'Mar', 4: 'Abr', 5: 'May', 6: 'Jun',
-            7: 'Jul', 8: 'Ago', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dic'
+            1: '01-Ene', 2: '02-Feb', 3: '03-Mar', 4: '04-Abr', 5: '05-May', 6: '06-Jun',
+            7: '07-Jul', 8: '08-Ago', 9: '09-Sep', 10: '10-Oct', 11: '11-Nov', 12: '12-Dic'
         }
 
         response = {
@@ -851,8 +850,8 @@ def api_budget_status_data():
 
         processed_data = {}
         month_keys_map = {
-            1: 'Ene', 2: 'Feb', 3: 'Mar', 4: 'Abr', 5: 'May', 6: 'Jun',
-            7: 'Jul', 8: 'Ago', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dic'
+            1: '01-Ene', 2: '02-Feb', 3: '03-Mar', 4: '04-Abr', 5: '05-May', 6: '06-Jun',
+            7: '07-Jul', 8: '08-Ago', 9: '09-Sep', 10: '10-Oct', 11: '11-Nov', 12: '12-Dic'
         }
 
         all_keys = set()
@@ -935,3 +934,10 @@ def api_budget_status_data():
     except Exception as e:
         current_app.logger.error(f"Error in api_budget_status_data: {str(e)}", exc_info=True)
         return jsonify({'error': str(e), 'message': 'Error en el servidor al procesar datos del estado del presupuesto.'}), 500
+    
+
+@finance_bp.route('/budgetInsights')
+def budget_insights():
+    # Pasamos el año actual por defecto
+    now = datetime.now()
+    return render_template('budgetInsights.html', datetime=datetime)

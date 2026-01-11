@@ -145,3 +145,24 @@
     max-width: 250px; /* Limitar ancho de observaciones */
     word-break: break-word;
 }
+
+/* finance/static/css/styles.css */
+:root {
+    --primary-blue: #007bff;
+    --success-green: #28a745;
+    --warning-yellow: #ffc107;
+    --danger-red: #dc3545;
+}
+
+.kpi-card .value {
+    color: var(--text-color);
+    transition: transform 0.3s ease;
+}
+
+.kpi-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Colores para las celdas de porcentaje en la tabla */
+.budget-over-high { background-color: #f8d7da !important; color: #721c24; } /* Rojo */
+.budget-on-target { background-color: #d4edda !important; color: #155724; } /* Verde */

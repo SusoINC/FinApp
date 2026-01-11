@@ -12,7 +12,7 @@ def index():
 @core_bp.route('/api/dashboard/summary')
 def dashboard_summary():
     # Obtener parámetros de filtro de la solicitud
-    year = request.args.get('year', '2025')
+    year = request.args.get('year', '2026')
     month = request.args.get('month', None)
     type_id = request.args.get('type', None)
     entity_id = request.args.get('entity', None)
@@ -27,7 +27,7 @@ def dashboard_summary():
         
         # Si no hay años en la base de datos, agregar el año actual como opción
         if not years:
-            years = [2025]  # Asegurar que al menos exista un año
+            years = [2026]  # Asegurar que al menos exista un año
         
         # Obtener entidades para el filtro
         cursor.execute("SELECT id, IBAN FROM Entity ORDER BY IBAN")
@@ -164,5 +164,5 @@ def dashboard_summary():
             'summary': {'total': 0, 'income': 0, 'expense': 0, 'investments': 0, 'quality': 0},
             'categories': [{'category': 'Error', 'amount': 0}],
             'monthly': [{'month': i, 'amount': 0} for i in range(1, 13)],
-            'filters': {'years': [2025], 'entities': [], 'types': []}
+            'filters': {'years': [2026], 'entities': [], 'types': []}
         }), 500
