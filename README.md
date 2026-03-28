@@ -82,4 +82,39 @@ Funcionalidades compartidas (conexiones a base de datos, utilidades comunes, etc
 
 ---
 
-## 📁 Estructura del proyecto (resumen)
+## 📁 Estructura del proyecto (Technical info)
+
+## 🏗️ Arquitectura y Detalles Técnicos por Módulo
+
+El proyecto está diseñado bajo una arquitectura modular para separar lógicas de negocio, facilitar la escalabilidad y mantener un código limpio. La aplicación se divide en los siguientes submódulos principales:
+
+### ⚙️ `core/` (Núcleo y Autenticación)
+Este es el motor base de la aplicación.
+* **Responsabilidad:** Gestiona la configuración central, la conexión a la base de datos y la seguridad.
+* **Técnico:** Aquí se implementan los controladores para el registro, *login* y manejo de sesiones de usuario (middlewares o decoradores de autenticación). También centraliza el enrutamiento hacia las vistas de inicio (*Dashboards* globales) y el manejo de errores HTTP (404, 500).
+
+### 🏦 `finance/` (Módulo Financiero)
+Encargado de la lógica transaccional del día a día.
+* **Responsabilidad:** Procesar y almacenar el flujo de caja del usuario.
+* **Técnico:** Implementa operaciones CRUD (Crear, Leer, Actualizar, Borrar) para ingresos y gastos. Utiliza modelos relacionales para vincular transacciones con categorías personalizadas y usuarios. Prepara consultas de agregación (GROUP BY, SUM) en la base de datos para enviar datos estructurados al frontend y renderizar gráficos de balance.
+
+### 📈 `investment/` (Módulo de Inversiones)
+Maneja la lógica compleja de cálculo de rentabilidades y seguimiento de activos.
+* **Responsabilidad:** Calcular el valor del portafolio en tiempo real y registrar el histórico de operaciones.
+* **Técnico:** Este módulo estructura modelos de datos específicos para diferentes tipos de activos (acciones, criptos, fondos). Probablemente se integre con APIs externas financieras para obtener cotizaciones actualizadas. Contiene la lógica matemática para calcular métricas como el ROI (Retorno de Inversión), el precio medio de compra (DCA) y la distribución del portafolio.
+
+### 🚗 `car/` (Módulo de Vehículos)
+Un micro-gestor de flotas orientado al usuario final.
+* **Responsabilidad:** Calcular la eficiencia del vehículo y predecir mantenimientos.
+* **Técnico:** Gestiona entidades de vehículos y registros dependientes (repostajes, facturas de taller). Incluye lógica de cálculo para determinar el consumo medio (ej. litros/100km o km/litro) basado en el odómetro y el volumen de combustible. Puede incluir funciones de comparación de fechas para generar alertas de vencimiento (ITV, seguro).
+
+### 🤖 `autoRun/` (Automatización y Tareas en Segundo Plano)
+Maneja los procesos desatendidos del servidor.
+* **Responsabilidad:** Mantener los datos actualizados sin requerir la interacción directa del usuario.
+* **Técnico:** Contiene *scripts* ejecutables de Python diseñados para correr como tareas programadas (cron jobs) o procesos en segundo plano. Ejemplos de uso: consultar APIs de bolsa diariamente al cierre del mercado, realizar copias de seguridad de la base de datos de SQLite/PostgreSQL, o generar y enviar notificaciones por correo electrónico.
+
+### 🎨 `templates/` y `static/` (Frontend y Capa de Presentación)
+La interfaz de usuario y la experiencia visual.
+* **Responsabilidad:** Renderizar los datos del backend de forma interactiva y *responsive*.
+* **Técnico:** * `templates/`: Utiliza un motor de plantillas (como Jinja2) para realizar *Server-Side Rendering (SSR)*, inyectando variables dinámicas y estructuras de control (bucles `for`, condicionales `if`) directamente en el HTML.
+  * `static/`: Sirve los *assets* estáticos. Utiliza JavaScript (posiblemente con librerías como Chart.js o similar) para peticiones asíncronas (AJAX/Fetch) que actualizan los datos de la interfaz sin recargar la página, y CSS para el diseño de la cuadrícula y adaptabilidad a dispositivos móviles.
